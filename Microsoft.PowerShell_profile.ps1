@@ -4,8 +4,13 @@
 # Line editing and history
 if (Get-Module -ListAvailable -Name PSReadLine) {
     Import-Module PSReadLine
-    Set-PSReadLineOption -PredictionSource History
-    Set-PSReadLineOption -PredictionViewStyle ListView
+    $cmd = Get-Command Set-PSReadLineOption -ErrorAction SilentlyContinue
+    if ($cmd -and $cmd.Parameters.ContainsKey('PredictionSource')) {
+        Set-PSReadLineOption -PredictionSource History
+    }
+    if ($cmd -and $cmd.Parameters.ContainsKey('PredictionViewStyle')) {
+        Set-PSReadLineOption -PredictionViewStyle ListView
+    }
     Set-PSReadLineOption -EditMode Windows
     Set-PSReadLineOption -BellStyle None
 }
@@ -45,4 +50,5 @@ function Refresh-Path {
 # Preferred editor
 $env:EDITOR = "code --wait"
 # Default directory
-if (Test-Path "$HOME\github") { Set-Location "$HOME\github" }
+$defaultGitHub = Join-Path $env:USERPROFILE 'github'
+if (Test-Path $defaultGitHub) { Set-Location $defaultGitHub }

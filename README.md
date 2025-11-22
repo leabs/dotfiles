@@ -29,11 +29,13 @@ Copy-Item .editorconfig "$home\.editorconfig" -Force
 3) Add your actual Git identity in the local override (keeps personal info out of the repo):
 Edit `$home\.gitconfig.local` that you just copied.
 
-4) Install the PowerShell profile:
+4) Install the PowerShell profile (it will start new shells in `$env:USERPROFILE\github` if that folder exists):
 ```pwsh
 $profileDir = Split-Path $PROFILE
 New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
+New-Item -ItemType Directory -Path "$env:USERPROFILE\github" -Force | Out-Null
 Copy-Item Microsoft.PowerShell_profile.ps1 $PROFILE -Force
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned   # allows the profile to run
 ```
 
 5) (Optional) Symlink instead of copy to keep updates in sync:
