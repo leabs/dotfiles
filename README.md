@@ -18,21 +18,16 @@ Set-Location $HOME\dotfiles
 
 2) Copy (or symlink) the dotfiles into place. Copying is simplest:
 ```pwsh
-Copy-Item .gitconfig $HOME\.gitconfig -Force
-Copy-Item .gitignore_global $HOME\.gitignore_global -Force
-Copy-Item .gitattributes $HOME\.gitattributes -Force
-Copy-Item .editorconfig $HOME\.editorconfig -Force
+$home = $env:USERPROFILE
+Copy-Item .gitconfig "$home\.gitconfig" -Force
+Copy-Item .gitconfig.local.example "$home\.gitconfig.local" -Force   # edit this with your info
+Copy-Item .gitignore_global "$home\.gitignore_global" -Force
+Copy-Item .gitattributes "$home\.gitattributes" -Force
+Copy-Item .editorconfig "$home\.editorconfig" -Force
 ```
 
 3) Add your actual Git identity in the local override (keeps personal info out of the repo):
-```pwsh
-@'
-[user]
-  name = Your Name
-  email = you@example.com
-  username = your_github
-'@ | Set-Content -Path $HOME\.gitconfig.local -Encoding UTF8
-```
+Edit `$home\.gitconfig.local` that you just copied.
 
 4) Install the PowerShell profile:
 ```pwsh

@@ -72,6 +72,7 @@
 	pf = push --force-with-lease
 	psu = push --set-upstream origin
 	tags = tag --list
+	upstream = "!git rev-parse --abbrev-ref --symbolic-full-name \"@{u}\""
 
 	# housekeeping
 	root = rev-parse --show-toplevel
