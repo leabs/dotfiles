@@ -82,6 +82,123 @@ setup_macos_shell() {
     "$custom/plugins/zsh-syntax-highlighting" "zsh-syntax-highlighting plugin"
 }
 
+configure_macos_zsh_dark_mode() {
+  local zsh_local="$home/.zshrc.local"
+  local setting='export DOTFILES_TERM_THEME=dark'
+
+  if [[ -f "$zsh_local" ]]; then
+    if grep -q '^export DOTFILES_TERM_THEME=dark$' "$zsh_local"; then
+      echo "macOS Zsh dark mode preference already set."
+      return
+    fi
+
+    if grep -q '^export DOTFILES_TERM_THEME=' "$zsh_local"; then
+      local tmp
+      tmp="$(mktemp)"
+      if awk -v setting="$setting" '
+        BEGIN { replaced=0 }
+        {
+          if ($0 ~ /^export DOTFILES_TERM_THEME=/) {
+            if (!replaced) { print setting; replaced=1 }
+          } else {
+            print
+          }
+        }
+        END {
+          if (!replaced) { print setting }
+        }
+      ' "$zsh_local" > "$tmp"; then
+        mv "$tmp" "$zsh_local"
+        echo "Updated DOTFILES_TERM_THEME to dark in $(basename "$zsh_local")."
+      else
+        echo "Warning: Could not update $zsh_local for dark mode." >&2
+        rm -f "$tmp"
+      fi
+      return
+    fi
+  fi
+
+  printf '%s\n' "$setting" >> "$zsh_local"
+  echo "Set DOTFILES_TERM_THEME=dark in $(basename "$zsh_local")."
+}
+
+ensure_linux_bash_config() {
+  local source="$script_dir/linux/.bashrc"
+  local shim="$home/.bashrc.dotfiles"
+  local bashrc="$home/.bashrc"
+
+  link_file "$source" "$shim"
+
+  if [[ -L "$bashrc" && "$(readlink "$bashrc")" == "$source" ]]; then
+    # Replace old one-shot symlink with a file that can keep user content.
+    rm "$bashrc"
+  fi
+
+  local block
+  read -r -d '' block <<'EOF' || true
+# >>> dotfiles linux bashrc >>>
+if [[ -f "$HOME/.bashrc.dotfiles" ]]; then
+  # shellcheck source=/dev/null
+  source "$HOME/.bashrc.dotfiles"
+fi
+# <<< dotfiles linux bashrc <<<
+EOF
+
+  if [[ ! -e "$bashrc" ]]; then
+    printf '%s\n' "$block" > "$bashrc"
+    return
+  fi
+
+  if ! grep -Fq 'dotfiles linux bashrc' "$bashrc"; then
+    printf '\n%s\n' "$block" >> "$bashrc"
+  fi
+}
+
+ensure_macos_zsh_config() {
+  local source="$script_dir/macos/.zshrc"
+  local shim="$home/.zshrc.dotfiles"
+  local zshrc="$home/.zshrc"
+
+  link_file "$source" "$shim"
+
+  if [[ -L "$zshrc" && "$(readlink "$zshrc")" == "$source" ]]; then
+    # Replace old one-shot symlink with a file that can keep user content.
+    rm "$zshrc"
+  fi
+
+  local block
+  read -r -d '' block <<'EOF' || true
+# >>> dotfiles macOS zshrc >>>
+if [[ -f "$HOME/.zshrc.dotfiles" ]]; then
+  source "$HOME/.zshrc.dotfiles"
+fi
+# <<< dotfiles macOS zshrc <<<
+EOF
+
+  if [[ ! -e "$zshrc" ]]; then
+    printf '%s\n' "$block" > "$zshrc"
+    return
+  fi
+
+  if ! grep -Fq 'dotfiles macOS zshrc' "$zshrc"; then
+    printf '\n%s\n' "$block" >> "$zshrc"
+  fi
+}
+
+require_shell_backup_confirmation() {
+  cat <<'EOF'
+WARNING: This bootstrap links dotfiles and may update your shell startup files.
+Please back up your existing configs (~/.zshrc, ~/.bashrc, ~/.bash_profile, etc.) first.
+Press Y to continue after you have backed them up (Ctrl+C to abort).
+EOF
+
+  read -r -p "Have you backed up your shell configs? Type Y to proceed: " reply
+  if [[ ! "$reply" =~ ^[Yy]$ ]]; then
+    echo "Aborting. Back up your shell config first." >&2
+    exit 1
+  fi
+}
+
 detect_os() {
   if [[ -n "${OSTYPE:-}" ]]; then
     case "${OSTYPE}" in
@@ -113,6 +230,12 @@ sync_dir() {
 
   [ -d "$dir" ] || return
   find "$dir" -maxdepth 1 -type f -print0 | while IFS= read -r -d '' file; do
+    local base
+    base="$(basename "$file")"
+    if [[ "$base" == ".zshrc" || "$base" == ".bashrc" ]]; then
+      # Handle macOS Zsh config separately so we don't clobber user settings.
+      continue
+    fi
     link_file "$file" "$home/$(basename "$file")"
   done
 }
@@ -125,10 +248,15 @@ if [[ -z "$os" ]]; then
 fi
 
 echo "Detected OS: $os"
+require_shell_backup_confirmation
 sync_dir "$script_dir/common"
 sync_dir "$script_dir/$os"
 if [[ "$os" == "macos" ]]; then
   setup_macos_shell
+  ensure_macos_zsh_config
+  configure_macos_zsh_dark_mode
+elif [[ "$os" == "linux" ]]; then
+  ensure_linux_bash_config
 fi
 ensure_local_override "$script_dir/common/.gitconfig.local.example" "$home/.gitconfig.local"
 echo "Done."

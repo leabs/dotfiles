@@ -10,6 +10,24 @@ export EDITOR="${EDITOR:-code --wait}"
 # Local overrides and secrets
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
 
+# --- Automatic iTerm2 Dark/Light Background -----------------------------------
+if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+  case "${DOTFILES_TERM_THEME:-auto}" in
+    dark) APP_MODE="Dark" ;;
+    light) APP_MODE="" ;;
+    *) APP_MODE="$(defaults read -g AppleInterfaceStyle 2>/dev/null || true)" ;;
+  esac
+
+  if [[ "$APP_MODE" == "Dark" ]]; then
+    echo -ne "\033]11;#0D0D0D\007"    # dark background
+    echo -ne "\033]10;#EAEAEA\007"    # light foreground
+  else
+    echo -ne "\033]11;#FFFFFF\007"    # light background
+    echo -ne "\033]10;#000000\007"    # dark foreground
+  fi
+fi
+# -------------------------------------------------------------------------------
+
 # Homebrew
 if command -v brew >/dev/null 2>&1; then
   eval "$(/opt/homebrew/bin/brew shellenv 2>/dev/null || /usr/local/bin/brew shellenv)" 2>/dev/null
@@ -62,3 +80,20 @@ alias ytmp4='yt-dlp -f best --recode-video mp4 -o "%(title)s.%(ext)s"'
 
 # P10k config
 [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+
+# Default working directory
+if [[ $- == *i* ]]; then
+  default_cwd="${DOTFILES_DEFAULT_CWD:-/github}"
+  fallback_cwd="$HOME/github"
+  target=""
+
+  if [[ -d "$default_cwd" ]]; then
+    target="$default_cwd"
+  elif [[ -d "$fallback_cwd" ]]; then
+    target="$fallback_cwd"
+  fi
+
+  if [[ -n "$target" && ( -o login || "${PWD:-}" == "$HOME" ) ]]; then
+    cd "$target"
+  fi
+fi
