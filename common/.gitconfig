@@ -1,0 +1,84 @@
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+
+[user]
+	name = YOUR_NAME
+	email = YOUR_EMAIL
+	username = YOUR_GITHUB      # optional; helps others know your GitHub handle
+
+[include]
+	path = ~/.gitconfig.local
+
+[core]
+	editor = code --wait
+	autocrlf = input
+	excludesfile = ~/.gitignore_global
+
+[init]
+	defaultBranch = main
+
+[color]
+	ui = auto
+	diff = auto
+	status = auto
+	branch = auto
+	interactive = auto
+
+[pull]
+	ff = only           # prevents accidental merge commits
+
+[push]
+	default = current   # pushes the checked-out branch
+
+[fetch]
+	prune = true        # drop deleted remote branches locally
+
+[merge]
+	conflictstyle = zdiff3
+	tool = code
+	# mergetool vscode settings
+	# command = code --wait "$MERGED"
+
+[rerere]
+	enabled = true      # remembers conflict resolutions
+
+[alias]
+	# basics
+	st = status -sb
+	co = checkout
+	ci = commit
+	cia = commit --amend --no-edit
+	br = branch
+	last = log -1 --stat
+	lg = log --oneline --graph --decorate --all
+	hist = log --pretty=format:'%C(yellow)%h%Creset %ad | %s%d [%an]' --date=short
+	diffw = diff --word-diff
+	difft = difftool
+	mt = mergetool
+
+	# staging/unstaging
+	aa = add --all
+	unstage = reset HEAD --
+	restore = restore --staged
+	fix = commit --fixup
+	reword = commit --amend
+
+	# remotes & sync
+	up = fetch --all --prune
+	plr = pull --rebase --autostash
+	pf = push --force-with-lease
+	psu = push --set-upstream origin
+	tags = tag --list
+	upstream = "!git rev-parse --abbrev-ref --symbolic-full-name \"@{u}\""
+
+	# housekeeping
+	root = rev-parse --show-toplevel
+	bclean = "!git branch --merged | egrep -v '(^\\*|main|master)' | xargs git branch -d"
+	rprune = remote prune origin
+	wip = commit -am \"WIP\"
+
+[credential]
+	helper = manager-core

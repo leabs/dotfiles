@@ -3,33 +3,45 @@
 Clone this repo and point your config files at it so you can `git pull` and keep getting updates, instead of copy/pasting static snippets. Dotfiles are organized per platform so you can install only what you need.
 
 ## Layout
-- `windows/`: Git config, global gitignore, gitattributes, editorconfig, PowerShell profile, and `.gitconfig.local.example`.
+- `common/`: Shared Git config, global gitignore, and gitattributes.
+- `windows/`: Git config, global gitignore, editorconfig, PowerShell profile, and `.gitconfig.local.example`.
 - `linux/`: A lightweight `.bashrc` starter with a few aliases and history tweaks.
 - `macos/`: A lightweight `.zshrc` starter with aliases and Homebrew path loading.
 
-## Windows setup (PowerShell)
+## One-shot bootstrap (all platforms)
+From the repo root, let the script detect your OS (macOS/Linux/Windows under MSYS/WSL) and symlink the common + OS-specific files into your home directory:
+```bash
+./bootstrap.sh
+```
+If you get a permission error, make it executable first:
+```bash
+chmod +x bootstrap.sh
+./bootstrap.sh
+```
+
+## Manual setup: Windows (PowerShell)
 1) Clone the repo:
 ```pwsh
 git clone https://github.com/steve/dotfiles.git $HOME\dotfiles
 Set-Location $HOME\dotfiles
 ```
 
-2) Symlink the dotfiles from the Windows directory so updates flow automatically:
+2) Symlink the shared Git files (from `common/`) and Windows-specific files so updates flow automatically:
 ```pwsh
 $home = $env:USERPROFILE
-New-Item -ItemType SymbolicLink -Path $home\.gitconfig -Target (Resolve-Path windows/.gitconfig) -Force
-New-Item -ItemType SymbolicLink -Path $home\.gitconfig.local -Target (Resolve-Path windows/.gitconfig.local.example) -Force   # edit this with your info
-New-Item -ItemType SymbolicLink -Path $home\.gitignore_global -Target (Resolve-Path windows/.gitignore_global) -Force
-New-Item -ItemType SymbolicLink -Path $home\.gitattributes -Target (Resolve-Path windows/.gitattributes) -Force
+New-Item -ItemType SymbolicLink -Path $home\.gitconfig -Target (Resolve-Path common/.gitconfig) -Force
+New-Item -ItemType SymbolicLink -Path $home\.gitconfig.local -Target (Resolve-Path common/.gitconfig.local.example) -Force   # edit this with your info
+New-Item -ItemType SymbolicLink -Path $home\.gitignore_global -Target (Resolve-Path common/.gitignore_global) -Force
+New-Item -ItemType SymbolicLink -Path $home\.gitattributes -Target (Resolve-Path common/.gitattributes) -Force
 New-Item -ItemType SymbolicLink -Path $home\.editorconfig -Target (Resolve-Path windows/.editorconfig) -Force
 ```
 
 If symlinks are blocked (for example, if Developer Mode is off), copy instead:
 ```pwsh
-Copy-Item windows/.gitconfig "$home\.gitconfig" -Force
-Copy-Item windows/.gitconfig.local.example "$home\.gitconfig.local" -Force
-Copy-Item windows/.gitignore_global "$home\.gitignore_global" -Force
-Copy-Item windows/.gitattributes "$home\.gitattributes" -Force
+Copy-Item common/.gitconfig "$home\.gitconfig" -Force
+Copy-Item common/.gitconfig.local.example "$home\.gitconfig.local" -Force
+Copy-Item common/.gitignore_global "$home\.gitignore_global" -Force
+Copy-Item common/.gitattributes "$home\.gitattributes" -Force
 Copy-Item windows/.editorconfig "$home\.editorconfig" -Force
 ```
 
@@ -52,22 +64,37 @@ Install-Module posh-git -Scope CurrentUser
 
 Keep the repo around and run `git pull` occasionally to grab updates, then open a new PowerShell session.
 
-## Linux setup (Bash)
+## Manual setup: Linux (Bash)
 1) Clone the repo and change into it.
-2) Symlink the starter Bash profile so updates pull through (copy if you prefer a static file):
+2) Symlink the shared Git settings and Bash profile so updates pull through (copy if you prefer a static file):
 ```bash
+ln -sf "$(pwd)/common/.gitconfig" ~/.gitconfig
+ln -sf "$(pwd)/common/.gitconfig.local.example" ~/.gitconfig.local   # edit this with your info
+ln -sf "$(pwd)/common/.gitignore_global" ~/.gitignore_global
+ln -sf "$(pwd)/common/.gitattributes" ~/.gitattributes
 ln -sf "$(pwd)/linux/.bashrc" ~/.bashrc
-# or: cp linux/.bashrc ~/.bashrc
+# or: cp the files instead of linking
 ```
 3) Add any machine-specific tweaks in `~/.bashrc.local` (loaded automatically if it exists).
 4) Keep the repo and run `git pull` occasionally to receive updates.
 
-## macOS setup (Zsh)
+## Manual setup: macOS (Zsh)
 1) Clone the repo and change into it.
-2) Symlink the starter Zsh profile so updates pull through (copy if you prefer a static file):
+2) Symlink the shared Git settings and Zsh profile so updates pull through (copy if you prefer a static file):
 ```bash
+ln -sf "$(pwd)/common/.gitconfig" ~/.gitconfig
+ln -sf "$(pwd)/common/.gitconfig.local.example" ~/.gitconfig.local   # edit this with your info
+ln -sf "$(pwd)/common/.gitignore_global" ~/.gitignore_global
+ln -sf "$(pwd)/common/.gitattributes" ~/.gitattributes
 ln -sf "$(pwd)/macos/.zshrc" ~/.zshrc
-# or: cp macos/.zshrc ~/.zshrc
+# or: cp the files instead of linking
 ```
 3) Add any machine-specific tweaks in `~/.zshrc.local` (loaded automatically if it exists).
 4) Keep the repo and run `git pull` occasionally to receive updates.
+5) Optional: install Oh My Zsh, Powerlevel10k, and plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`) to enable the theme and extras:
+```bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+git clone https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-syntax-highlighting ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+```

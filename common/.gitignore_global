@@ -1,0 +1,34 @@
+# OS metadata
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+*.lnk
+
+# Editors / IDEs
+.vscode/
+.vscode-test/
+.idea/
+*.code-workspace
+
+# Logs & temps
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.tmp
+*.temp
+
+# Node / JS build
+node_modules/
+dist/
+coverage/
+
+# Misc
+*.bak
+*.orig
+*.swp
+*.swo
+*.retry
+.gitconfig.local
