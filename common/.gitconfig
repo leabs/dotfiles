@@ -79,6 +79,3 @@
 	bclean = "!git branch --merged | egrep -v '(^\\*|main|master)' | xargs git branch -d"
 	rprune = remote prune origin
 	wip = commit -am \"WIP\"
-
-[credential]
-	helper = manager-core

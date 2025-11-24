@@ -9,7 +9,7 @@ Clone this repo and point your config files at it so you can `git pull` and keep
 - `macos/`: A lightweight `.zshrc` starter with aliases and Homebrew path loading.
 
 ## One-shot bootstrap (all platforms)
-From the repo root, let the script detect your OS (macOS/Linux/Windows under MSYS/WSL) and symlink the common + OS-specific files into your home directory:
+From the repo root, let the script detect your OS (macOS/Linux/Windows under MSYS/WSL) and symlink the common + OS-specific files into your home directory. On macOS it also installs Oh My Zsh, Powerlevel10k, and the optional plugins if they are missing (requires `curl` + `git`):
 ```bash
 ./bootstrap.sh
 ```
@@ -91,7 +91,7 @@ ln -sf "$(pwd)/macos/.zshrc" ~/.zshrc
 ```
 3) Add any machine-specific tweaks in `~/.zshrc.local` (loaded automatically if it exists).
 4) Keep the repo and run `git pull` occasionally to receive updates.
-5) Optional: install Oh My Zsh, Powerlevel10k, and plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`) to enable the theme and extras:
+5) Optional when running the manual steps: install Oh My Zsh, Powerlevel10k, and plugins (`zsh-autosuggestions`, `zsh-syntax-highlighting`) to enable the theme and extras (the bootstrap script does this for you on macOS):
 ```bash
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 git clone https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k

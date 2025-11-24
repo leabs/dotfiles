@@ -42,7 +42,12 @@ export PATH="$HOME/.gem/bin:$HOME/.rvm/bin:$PATH"
 
 # Oh-My-Zsh load (only if installed; skip missing-plugin noise)
 export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="powerlevel10k/powerlevel10k"
+export ZSH_DISABLE_COMPFIX="true"
+if [[ -d "$ZSH/custom/themes/powerlevel10k" ]]; then
+  ZSH_THEME="powerlevel10k/powerlevel10k"
+else
+  ZSH_THEME="robbyrussell"
+fi
 plugins=(git)
 [[ -d "$ZSH/custom/plugins/zsh-autosuggestions" ]] && plugins+=(zsh-autosuggestions)
 [[ -d "$ZSH/custom/plugins/zsh-syntax-highlighting" ]] && plugins+=(zsh-syntax-highlighting)
