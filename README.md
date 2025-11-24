@@ -9,7 +9,7 @@ Clone this repo and point your config files at it so you can `git pull` and keep
 - `macos/`: A lightweight `.zshrc` starter with aliases and Homebrew path loading.
 
 ## One-shot bootstrap (all platforms)
-From the repo root, let the script detect your OS (macOS/Linux/Windows under MSYS/WSL) and symlink the common + OS-specific files into your home directory. On macOS it also installs Oh My Zsh, Powerlevel10k, and the optional plugins if they are missing (requires `curl` + `git`):
+From the repo root, let the script detect your OS (macOS/Linux/Windows under MSYS/WSL) and symlink the common + OS-specific files into your home directory. On macOS it also installs Oh My Zsh, Powerlevel10k, and the optional plugins if they are missing (requires `curl` + `git`). If you don’t already have `~/.gitconfig.local`, the script copies `common/.gitconfig.local.example` so Git knows who you are—open it afterward and put in your actual name/email:
 ```bash
 ./bootstrap.sh
 ```

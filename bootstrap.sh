@@ -4,6 +4,20 @@ set -euo pipefail
 script_dir="$(cd -- "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 home="${HOME}"
 
+ensure_local_override() {
+  local example="$1"
+  local dest="$2"
+
+  if [[ -e "$dest" ]]; then
+    return
+  fi
+
+  if [[ -f "$example" ]]; then
+    cp "$example" "$dest"
+    echo "Created $(basename "$dest") from $(basename "$example"). Update it with your info."
+  fi
+}
+
 install_oh_my_zsh() {
   local ohmyzsh="$home/.oh-my-zsh"
 
@@ -116,4 +130,5 @@ sync_dir "$script_dir/$os"
 if [[ "$os" == "macos" ]]; then
   setup_macos_shell
 fi
+ensure_local_override "$script_dir/common/.gitconfig.local.example" "$home/.gitconfig.local"
 echo "Done."
